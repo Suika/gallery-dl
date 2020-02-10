@@ -18,7 +18,7 @@ class DirectlinkExtractor(Extractor):
     filename_fmt = "{domain}/{path}/{filename}.{extension}"
     archive_fmt = filename_fmt
     pattern = (r"(?i)https?://(?P<domain>[^/?&#]+)/(?P<path>[^?&#]+\."
-               r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
+               r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus|x-m4v|zip|rar|mpeg|3gpp|x-tga|x-rar|x-empty|vnd|quicktime|pdf|octet-stream|mpegapplication|html))"
                r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$")
     test = (
         (("https://en.wikipedia.org/static/images/project-logos/enwiki.png"), {
