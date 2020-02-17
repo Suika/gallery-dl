@@ -259,6 +259,7 @@ class TestFormatter(unittest.TestCase):
     kwdict = {
         "a": "hElLo wOrLd",
         "b": "äöü",
+        "d": {"a": "foo", "b": 0, "c": None},
         "l": ["a", "b", "c"],
         "n": None,
         "u": "%27%3C%20/%20%3E%27",
@@ -323,6 +324,26 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{missing[key]}", replacement, default)
         self._run_test("{missing:?a//}", "a" + default, default)
 
+    def test_alternative(self):
+        self._run_test("{a|z}"    , "hElLo wOrLd")
+        self._run_test("{z|a}"    , "hElLo wOrLd")
+        self._run_test("{z|y|a}"  , "hElLo wOrLd")
+        self._run_test("{z|y|x|a}", "hElLo wOrLd")
+        self._run_test("{z|n|a|y}", "hElLo wOrLd")
+
+        self._run_test("{z|a!C}"      , "Hello World")
+        self._run_test("{z|a:Rh/C/}"  , "CElLo wOrLd")
+        self._run_test("{z|a!C:RH/C/}", "Cello World")
+        self._run_test("{z|y|x:?</>/}", "")
+
+        self._run_test("{d[c]|d[b]|d[a]}", "0")
+        self._run_test("{d[a]|d[b]|d[c]}", "foo")
+        self._run_test("{d[z]|d[y]|d[x]}", "None")
+
+    def test_indexing(self):
+        self._run_test("{l[0]}" , "a")
+        self._run_test("{a[6]}" , "w")
+
     def test_slicing(self):
         v = self.kwdict["a"]
         self._run_test("{a[1:10]}"  , v[1:10])
@@ -368,6 +389,18 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!l:Rl/_/}", "he__o wor_d")
         self._run_test("{a!l:Rl//}" , "heo word")
         self._run_test("{name:Rame/othing/}", "Nothing")
+
+    def test_chain_special(self):
+        # multiple replacements
+        self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
+        self._run_test("{d[b]!s:R1/Q/R2/A/R0/Y/}", "Y")
+
+        # join-and-replace
+        self._run_test("{l:J-/Rb/E/}", "a-E-c")
+
+        # optional-and-maxlen
+        self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
+        self._run_test("{d[c]:?</>/L5/too long/}", "")
 
     def _run_test(self, format_string, result, default=None):
         formatter = util.Formatter(format_string, default)

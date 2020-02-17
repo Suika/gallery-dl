@@ -225,12 +225,21 @@ extractor.*.cookies
 =========== =====
 Type        |Path|_ or ``object``
 Default     ``null``
-Description Source to read additional cookies from.
+Description Source to read additional cookies from. Either as
 
-            * If this is a |Path|_, it specifies a
-              Mozilla/Netscape format cookies.txt file.
-            * If this is an ``object``, its key-value pairs, which should both
-              be ``strings``, will be used as cookie-names and -values.
+            * the |Path|_ to a Mozilla/Netscape format cookies.txt file or
+            * a JSON ``object`` specifying cookies as a name-to-value mapping
+
+              Example:
+
+              .. code::
+
+                {
+                    "cookie-name": "cookie-value",
+                    "sessionid"  : "14313336321%3AsabDFvuASDnlpb%3A31",
+                    "isAdult"    : "1"
+                }
+
 =========== =====
 
 
@@ -239,8 +248,9 @@ extractor.*.cookies-update
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description If `extractor.*.cookies`_ specifies a cookies.txt file, update its
-            contents with cookies received during data extraction.
+Description If `extractor.*.cookies`_ specifies the |Path|_ to a cookies.txt
+            file and it can be opened and parsed without errors,
+            update its contents with cookies received during data extraction.
 =========== =====
 
 
@@ -884,9 +894,14 @@ Type        ``bool``
 Default     ``true``
 Description Download Pixiv's Ugoira animations or ignore them.
 
-            These animations come as a ``.zip`` file containing all the single
+            These animations come as a ``.zip`` file containing all
             animation frames in JPEG format.
+
+            Use an `ugoira`_ post processor to convert them
+            to watchable videos. (Example__)
 =========== =====
+
+__ https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
 
 extractor.plurk.comments
@@ -1143,7 +1158,7 @@ extractor.twitter.videos
 ------------------------
 =========== =====
 Type        ``bool`` or ``string``
-Default     ``false``
+Default     ``true``
 Description Control video download behavior.
 
             * ``true``: Download videos and use `youtube-dl`_ to handle
