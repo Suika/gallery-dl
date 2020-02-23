@@ -43,8 +43,10 @@ Hentai Cafe          https://hentai.cafe/                Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     |hentaifoundry-C|
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiFox            https://hentaifox.com/              Galleries, Search Results
+HentaiHand           https://hentaihand.com/             Galleries, Search Results, Tag-Searches
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hentainexus          https://hentainexus.com/            Galleries, Search Results
+Hiperdex             https://hiperdex.com/               Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag-Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
