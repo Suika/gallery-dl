@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -96,12 +96,12 @@ class DatabaseCacheDecorator():
 
         # database lookup
         fullkey = "%s-%s" % (self.key, key)
-        cursor = self.cursor()
-        try:
-            cursor.execute("BEGIN EXCLUSIVE")
-        except sqlite3.OperationalError:
-            pass  # Silently swallow exception - workaround for Python 3.6
-        try:
+        with self.database() as db:
+            cursor = db.cursor()
+            try:
+                cursor.execute("BEGIN EXCLUSIVE")
+            except sqlite3.OperationalError:
+                pass  # Silently swallow exception - workaround for Python 3.6
             cursor.execute(
                 "SELECT value, expires FROM data WHERE key=? LIMIT 1",
                 (fullkey,),
@@ -118,37 +118,38 @@ class DatabaseCacheDecorator():
                     "INSERT OR REPLACE INTO data VALUES (?,?,?)",
                     (fullkey, pickle.dumps(value), expires),
                 )
-        finally:
-            self.db.commit()
+
         self.cache[key] = value, expires
         return value
 
     def update(self, key, value):
         expires = int(time.time()) + self.maxage
         self.cache[key] = value, expires
-        self.cursor().execute(
-            "INSERT OR REPLACE INTO data VALUES (?,?,?)",
-            ("%s-%s" % (self.key, key), pickle.dumps(value), expires),
-        )
+        with self.database() as db:
+            db.execute(
+                "INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                ("%s-%s" % (self.key, key), pickle.dumps(value), expires),
+            )
 
     def invalidate(self, key):
         try:
             del self.cache[key]
         except KeyError:
             pass
-        self.cursor().execute(
-            "DELETE FROM data WHERE key=? LIMIT 1",
-            ("%s-%s" % (self.key, key),),
-        )
+        with self.database() as db:
+            db.execute(
+                "DELETE FROM data WHERE key=?",
+                ("%s-%s" % (self.key, key),),
+            )
 
-    def cursor(self):
+    def database(self):
         if self._init:
             self.db.execute(
                 "CREATE TABLE IF NOT EXISTS data "
                 "(key TEXT PRIMARY KEY, value TEXT, expires INTEGER)"
             )
             DatabaseCacheDecorator._init = False
-        return self.db.cursor()
+        return self.db
 
 
 def memcache(maxage=None, keyarg=None):
