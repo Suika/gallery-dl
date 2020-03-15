@@ -196,18 +196,31 @@ Default     ``null``
 Description The username and password to use when attempting to log in to
             another site.
 
-            Specifying username and password is required for the
-            ``pixiv``, ``nijie``, and ``seiga``
-            modules and optional (but strongly recommended) for
-            ``danbooru``, ``exhentai``, ``idolcomplex``, ``instagram``,
-            ``luscious``, ``sankaku``, ``tsumino``, and ``twitter``.
+            Specifying a username and password is required for
+
+            * ``pixiv``
+            * ``nijie``
+            * ``seiga``
+
+            and optional for
+
+            * ``danbooru``
+            * ``e621``
+            * ``exhentai``
+            * ``idolcomplex``
+            * ``instagram``
+            * ``luscious``
+            * ``sankaku``
+            * ``tsumino``
+            * ``twitter``
 
             These values can also be set via the ``-u/--username`` and
             ``-p/--password`` command-line options or by using a |.netrc|_ file.
             (see Authentication_)
 
-            Note: The password for ``danbooru`` is the API key found in your
-            user profile, not the password for your account.
+            Note: The password values for ``danbooru`` and ``e621`` should be
+            the API keys found in your user profile, not your actual account
+            password.
 =========== =====
 
 
@@ -790,6 +803,17 @@ Description The name of the preferred animation format, which can be one of
 =========== =====
 
 
+extractor.hitomi.metadata
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Try to extract
+            ``artist``, ``group``, ``parody``,  and ``characters``
+            metadata.
+=========== =====
+
+
 extractor.imgur.mp4
 -------------------
 =========== =====
@@ -884,6 +908,15 @@ extractor.photobucket.subalbums
 Type        ``bool``
 Default     ``true``
 Description Download subalbums.
+=========== =====
+
+
+extractor.pixiv.user.avatar
+---------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Download user avatars.
 =========== =====
 
 

@@ -27,7 +27,7 @@ DeviantArt           https://www.deviantart.com/         |deviantart-C|         
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
 E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Optional
-e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
+e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches         Optional
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
@@ -136,6 +136,7 @@ Imxto                https://imx.to/                     individual Images
 Pixhost              https://pixhost.to/                 individual Images
 Postimg              https://postimages.org/             individual Images
 Turboimagehost       https://www.turboimagehost.com/     individual Images
+かべうち                 https://kabe-uchiroom.com/          User Profiles
 もえぴりあ                https://vanilla-rock.com/           Posts, Tag-Searches
 半次元                  https://bcy.net/                    Posts, User Profiles
 ==================== =================================== ================================================== ================
@@ -146,7 +147,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Subreddits, User Profiles
 .. |instagram-C| replace:: Channels, individual Images, Stories, Tag-Searches, User Profiles
-.. |newgrounds-C| replace:: Art, Audio, individual Images, Media Files, Movies, User Profiles
+.. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, individual Images, User Profiles
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles

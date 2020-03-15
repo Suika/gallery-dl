@@ -45,6 +45,7 @@ CATEGORY_MAP = {
     "imgth"          : "imgth",
     "imgur"          : "imgur",
     "jaiminisbox"    : "Jaimini's Box",
+    "kabeuchi"       : "かべうち",
     "kireicake"      : "Kirei Cake",
     "kissmanga"      : "KissManga",
     "lineblog"       : "LINE BLOG",
@@ -134,6 +135,7 @@ SUBCATEGORY_MAP = {
 AUTH_MAP = {
     "danbooru"   : "Optional",
     "deviantart" : "Optional (OAuth)",
+    "e621"       : "Optional",
     "e-hentai"   : "Optional",
     "exhentai"   : "Optional",
     "flickr"     : "Optional (OAuth)",

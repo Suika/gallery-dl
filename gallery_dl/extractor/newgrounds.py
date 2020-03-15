@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import itertools
 import json
 
 
@@ -35,16 +36,17 @@ class NewgroundsExtractor(Extractor):
 
         for post_url in self.posts():
             try:
-                file = self.extract_post(post_url)
-                url = file["url"]
-            #  except Exception:
+                post = self.extract_post(post_url)
+                url = post.get("url")
             except OSError:
                 url = None
-            if not url:
-                self.log.warning("Unable to get download URL for %s", post_url)
-                continue
-            yield Message.Directory, file
-            yield Message.Url, url, text.nameext_from_url(url, file)
+
+            if url:
+                yield Message.Directory, post
+                yield Message.Url, url, text.nameext_from_url(url, post)
+            else:
+                self.log.warning(
+                    "Unable to get download URL for '%s'", post_url)
 
     def posts(self):
         """Return urls of all relevant image pages"""
@@ -82,7 +84,10 @@ class NewgroundsExtractor(Extractor):
         }
 
     def extract_post(self, post_url):
-        page = self.request(post_url).text
+        response = self.request(post_url, fatal=False)
+        if response.status_code >= 400:
+            return {}
+        page = response.text
         extr = text.extract_from(page)
 
         if "/art/view/" in post_url:
@@ -97,8 +102,7 @@ class NewgroundsExtractor(Extractor):
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
-        data["tags"] = text.split_html(extr(
-            '<dd class="tags">', '</dd>'))
+        data["tags"] = text.split_html(extr('<dd class="tags">', '</dd>'))
         data["artist"] = [
             text.extract(user, '//', '.')[0]
             for user in text.extract_iter(page, '<div class="item-user">', '>')
@@ -334,3 +338,53 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
             (NewgroundsAudioExtractor , base + "audio"),
             (NewgroundsMoviesExtractor, base + "movies"),
         ), ("art",))
+
+
+class NewgroundsFavoriteExtractor(NewgroundsExtractor):
+    """Extractor for posts favorited by a newgrounds user"""
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "{user}", "Favorites")
+    pattern = (r"(?:https?://)?([^.]+)\.newgrounds\.com"
+               r"/favorites(?:/(art|audio|movies))?/?")
+    test = (
+        ("https://tomfulp.newgrounds.com/favorites/art", {
+            "range": "1-10",
+            "count": ">= 10",
+        }),
+        ("https://tomfulp.newgrounds.com/favorites/audio"),
+        ("https://tomfulp.newgrounds.com/favorites/movies"),
+        ("https://tomfulp.newgrounds.com/favorites/"),
+    )
+
+    def __init__(self, match):
+        NewgroundsExtractor.__init__(self, match)
+        self.kind = match.group(2)
+
+    def posts(self):
+        if self.kind:
+            return self._pagination(self.kind)
+        return itertools.chain.from_iterable(
+            self._pagination(k) for k in ("art", "audio", "movies")
+        )
+
+    def _pagination(self, kind):
+        num = 1
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": self.user_root,
+        }
+
+        while True:
+            url = "{}/favorites/{}/{}".format(self.user_root, kind, num)
+            response = self.request(url, headers=headers)
+            if response.history:
+                return
+
+            favs = list(text.extract_iter(
+                response.text, 'href="//www.newgrounds.com', '"'))
+            for path in favs:
+                yield self.root + path
+            if len(favs) < 24:
+                return
+            num += 1
