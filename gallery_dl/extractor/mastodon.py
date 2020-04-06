@@ -9,7 +9,7 @@
 """Extractors for mastodon instances"""
 
 from .common import Extractor, Message
-from .. import text, config, exception
+from .. import text, util, config, exception
 import re
 
 
@@ -108,7 +108,7 @@ class MastodonAPI():
     def account_search(self, query, limit=40):
         """Search for content"""
         params = {"q": query, "limit": limit}
-        return self._call("accounts/search", params)
+        return self._call("accounts/search", params).json()
 
     def account_statuses(self, account_id):
         """Get an account's statuses"""
@@ -118,28 +118,38 @@ class MastodonAPI():
 
     def status(self, status_id):
         """Fetch a Status"""
-        return self._call("statuses/" + status_id)
+        return self._call("statuses/" + status_id).json()
 
     def _call(self, endpoint, params=None):
         url = "{}/api/v1/{}".format(self.root, endpoint)
-        response = self.extractor.request(
-            url, params=params, headers=self.headers)
-        return self._parse(response)
+
+        while True:
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
+            code = response.status_code
+
+            if code < 400:
+                return response
+            if code == 404:
+                raise exception.NotFoundError()
+            if code == 429:
+                self.extractor.wait(until=text.parse_datetime(
+                    response.headers["x-ratelimit-reset"],
+                    "%Y-%m-%dT%H:%M:%S.%fZ",
+                ))
+                continue
+            raise exception.StopExtraction(response.json().get("error"))
 
     def _pagination(self, endpoint, params):
         url = "{}/api/v1/{}".format(self.root, endpoint)
         while url:
-            response = self.extractor.request(
-                url, params=params, headers=self.headers)
-            yield from self._parse(response)
-            url = response.links.get("next", {}).get("url")
+            response = self._call(endpoint, params)
+            yield from response.json()
 
-    @staticmethod
-    def _parse(response):
-        """Parse an API response"""
-        if response.status_code == 404:
-            raise exception.NotFoundError()
-        return response.json()
+            url = response.links.get("next")
+            if not url:
+                return
+            url = url["url"]
 
 
 def generate_extractors():
@@ -148,7 +158,7 @@ def generate_extractors():
     symtable = globals()
     extractors = config.get(("extractor",), "mastodon")
     if extractors:
-        EXTRACTORS.update(extractors)
+        util.combine_dict(EXTRACTORS, extractors)
     config.set(("extractor",), "mastodon", EXTRACTORS)
 
     for instance, info in EXTRACTORS.items():
@@ -197,12 +207,12 @@ EXTRACTORS = {
     },
     "pawoo.net": {
         "category"     : "pawoo",
-        "access-token" : "286462927198d0cf3e24683e91c8259a"
-                         "ac4367233064e0570ca18df2ac65b226",
-        "client-id"    : "97b142b6904abf97a1068d51a7bc2f2f"
-                         "cf9323cef81f13cb505415716dba7dac",
-        "client-secret": "e45bef4bad45b38abf7d9ef88a646b73"
-                         "75e7fb2532c31a026327a93549236481",
+        "access-token" : "c12c9d275050bce0dc92169a28db09d7"
+                         "0d62d0a75a8525953098c167eacd3668",
+        "client-id"    : "978a25f843ec01e53d09be2c290cd75c"
+                         "782bc3b7fdbd7ea4164b9f3c3780c8ff",
+        "client-secret": "9208e3d4a7997032cf4f1b0e12e5df38"
+                         "8428ef1fadb446dcfeb4f5ed6872d97b",
     },
     "baraag.net": {
         "category"     : "baraag",
