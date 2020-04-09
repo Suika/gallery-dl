@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 import sys
-import unittest
+import time
 import string
+from datetime import datetime, timedelta
+
+import unittest
+from unittest.mock import patch
 
 from gallery_dl import extractor
+from gallery_dl.extractor import mastodon
 from gallery_dl.extractor.common import Extractor, Message
 from gallery_dl.extractor.directlink import DirectlinkExtractor as DLExtractor
 
@@ -26,7 +31,7 @@ class FakeExtractor(Extractor):
         yield Message.Url, "text:foobar", {}
 
 
-class TestExtractor(unittest.TestCase):
+class TestExtractorModule(unittest.TestCase):
     VALID_URIS = (
         "https://example.org/file.jpg",
         "tumblr:foobar",
@@ -168,6 +173,117 @@ class TestExtractor(unittest.TestCase):
                 if expected[0].isdigit():
                     expected = "_" + expected
                 self.assertEqual(expected, extr.__name__)
+
+
+class TestExtractorWait(unittest.TestCase):
+
+    def test_wait_seconds(self):
+        extr = extractor.find("test:")
+        seconds = 5
+        until = time.time() + seconds
+
+        with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
+            extr.wait(seconds=seconds)
+
+            sleep.assert_called_once_with(6.0)
+
+            calls = log.info.mock_calls
+            self.assertEqual(len(calls), 1)
+            self._assert_isotime(calls[0][1][1], until)
+
+    def test_wait_until(self):
+        extr = extractor.find("test:")
+        until = time.time() + 5
+
+        with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
+            extr.wait(until=until)
+
+            calls = sleep.mock_calls
+            self.assertEqual(len(calls), 1)
+            self.assertAlmostEqual(calls[0][1][0], 6.0, places=1)
+
+            calls = log.info.mock_calls
+            self.assertEqual(len(calls), 1)
+            self._assert_isotime(calls[0][1][1], until)
+
+    def test_wait_until_datetime(self):
+        extr = extractor.find("test:")
+        until = datetime.utcnow() + timedelta(seconds=5)
+        until_local = datetime.now() + timedelta(seconds=5)
+
+        with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
+            extr.wait(until=until)
+
+            calls = sleep.mock_calls
+            self.assertEqual(len(calls), 1)
+            self.assertAlmostEqual(calls[0][1][0], 6.0, places=1)
+
+            calls = log.info.mock_calls
+            self.assertEqual(len(calls), 1)
+            self._assert_isotime(calls[0][1][1], until_local)
+
+    def _assert_isotime(self, output, until):
+        if not isinstance(until, datetime):
+            until = datetime.fromtimestamp(until)
+        o = self._isotime_to_seconds(output)
+        u = self._isotime_to_seconds(until.time().isoformat()[:8])
+        self.assertLess(o-u, 1.0)
+
+    @staticmethod
+    def _isotime_to_seconds(isotime):
+        parts = isotime.split(":")
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+
+
+class TextExtractorOAuth(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        mastodon.generate_extractors()
+
+    def test_oauth1(self):
+        for category in ("flickr", "smugmug", "tumblr"):
+            extr = extractor.find("oauth:" + category)
+
+            with patch.object(extr, "_oauth1_authorization_flow") as m:
+                for msg in extr:
+                    pass
+                self.assertEqual(len(m.mock_calls), 1)
+
+    def test_oauth2(self):
+        for category in ("deviantart", "reddit"):
+            extr = extractor.find("oauth:" + category)
+
+            with patch.object(extr, "_oauth2_authorization_code_grant") as m:
+                for msg in extr:
+                    pass
+                self.assertEqual(len(m.mock_calls), 1)
+
+    def test_oauth2_mastodon(self):
+        extr = extractor.find("oauth:mastodon:pawoo.net")
+
+        with patch.object(extr, "_oauth2_authorization_code_grant") as m, \
+                patch.object(extr, "_register") as r:
+            for msg in extr:
+                pass
+            self.assertEqual(len(r.mock_calls), 0)
+            self.assertEqual(len(m.mock_calls), 1)
+
+    def test_oauth2_mastodon_unknown(self):
+        extr = extractor.find("oauth:mastodon:example.com")
+
+        with patch.object(extr, "_oauth2_authorization_code_grant") as m, \
+                patch.object(extr, "_register") as r:
+            r.return_value = {
+                "client-id"    : "foo",
+                "client-secret": "bar",
+            }
+
+            for msg in extr:
+                pass
+
+            self.assertEqual(len(r.mock_calls), 1)
+            self.assertEqual(len(m.mock_calls), 1)
 
 
 if __name__ == "__main__":
