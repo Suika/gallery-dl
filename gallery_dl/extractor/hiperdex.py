@@ -125,16 +125,44 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     def chapters(self, page):
         self.manga_data(self.manga, page)
         results = []
-        last = None
 
-        page = text.extract(page, 'class="page-content-listing', '</ul>')[0]
-        for match in HiperdexChapterExtractor.pattern.finditer(page):
-            path = match.group(1)
-            if last != path:
-                last = path
-                results.append((
-                    self.root + path,
-                    self.chapter_data(path.rpartition("/")[2]),
-                ))
+        shortlink = text.extract(page, "rel='shortlink' href='", "'")[0]
+        data = {
+            "action": "manga_get_chapters",
+            "manga" : shortlink.rpartition("=")[2],
+        }
+        url = self.root + "/wp-admin/admin-ajax.php"
+        page = self.request(url, method="POST", data=data).text
 
+        for url in text.extract_iter(page, 'href="', '"', 320):
+            chapter = url.rpartition("/")[2]
+            results.append((url, self.chapter_data(chapter)))
+
+        return results
+
+
+class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
+    """Extractor for an artists's manga on hiperdex.com"""
+    subcategory = "artist"
+    categorytransfer = False
+    chapterclass = HiperdexMangaExtractor
+    reverse = False
+    pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.com"
+               r"(/manga-a(?:rtist|uthor)/([^/?&#]+))")
+    test = (
+        ("https://hiperdex.com/manga-artist/beck-ho-an/"),
+        ("https://hiperdex.com/manga-author/viagra/", {
+            "pattern": HiperdexMangaExtractor.pattern,
+            "count": ">= 6",
+        }),
+    )
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match, self.root + match.group(1) + "/")
+
+    def chapters(self, page):
+        results = []
+        for info in text.extract_iter(page, 'id="manga-item-', '<img'):
+            url = text.extract(info, 'href="', '"')[0]
+            results.append((url, {}))
         return results
