@@ -1169,12 +1169,21 @@ Description Extract tweet text as ``content`` metadata.
 =========== =====
 
 
+extractor.twitter.replies
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract media from replies to other Tweets.
+=========== =====
+
+
 extractor.twitter.retweets
 --------------------------
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract images from retweets.
+Description Extract media from Retweets.
 =========== =====
 
 
@@ -1220,6 +1229,24 @@ Description Your  `API Key <https://wallhaven.cc/settings/account>`__ to use
             your account's browsing settings and default filters when searching.
 
             See https://wallhaven.cc/help/api for more information.
+=========== =====
+
+
+extractor.weibo.retweets
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract media from retweeted posts.
+=========== =====
+
+
+extractor.weibo.videos
+----------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download video files.
 =========== =====
 
 

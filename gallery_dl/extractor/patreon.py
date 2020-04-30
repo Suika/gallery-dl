@@ -47,8 +47,8 @@ class PatreonExtractor(Extractor):
                 self._attachments(post),
                 self._content(post),
             ):
-                fhash = url.split("/")[9].partition("?")[0]
-                if fhash not in hashes:
+                fhash = self._filehash(url)
+                if fhash not in hashes or not fhash:
                     hashes.add(fhash)
                     post["hash"] = fhash
                     post["type"] = kind
@@ -158,10 +158,21 @@ class PatreonExtractor(Extractor):
         return attr
 
     def _filename(self, url):
-        """Fetch filename from its Content-Disposition header"""
+        """Fetch filename from an URL's Content-Disposition header"""
         response = self.request(url, method="HEAD", fatal=False)
         cd = response.headers.get("Content-Disposition")
         return text.extract(cd, 'filename="', '"')[0]
+
+    @staticmethod
+    def _filehash(url):
+        """Extract MD5 hash from a download URL"""
+        parts = url.partition("?")[0].split("/")
+        parts.reverse()
+
+        for part in parts:
+            if len(part) == 32:
+                return part
+        return ""
 
     @staticmethod
     def _build_url(endpoint, query):
@@ -194,7 +205,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?&#]))"
-               r"(?:user(?:/posts)?/?\?([^#]+)|([^/?&#]+)/?)")
+               r"([^/?&#]+)(?:/posts)?/?(?:\?([^#]+))?")
     test = (
         ("https://www.patreon.com/koveliana", {
             "range": "1-25",
@@ -213,6 +224,10 @@ class PatreonCreatorExtractor(PatreonExtractor):
                 "title"        : str,
             },
         }),
+        ("https://www.patreon.com/koveliana/posts?filters[month]=2020-3", {
+            "count": 1,
+            "keyword": {"date": "dt:2020-03-30 21:21:44"},
+        }),
         ("https://www.patreon.com/kovelianot", {
             "exception": exception.NotFoundError,
         }),
@@ -222,26 +237,33 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
     def __init__(self, match):
         PatreonExtractor.__init__(self, match)
-        self.query, self.creator = match.groups()
+        self.creator, self.query = match.groups()
 
     def posts(self):
-        if self.creator:
-            url = "{}/{}".format(self.root, self.creator.lower())
+        query = text.parse_query(self.query)
+
+        creator_id = query.get("u")
+        if creator_id:
+            url = "{}/user?u={}".format(self.root, creator_id)
         else:
-            query = text.parse_query(self.query)
-            url = "{}/user?u={}".format(self.root, query.get("u"))
+            url = "{}/{}".format(self.root, self.creator.lower())
 
         page = self.request(url, notfound="creator").text
         campaign_id = text.extract(page, "/campaign/", "/")[0]
-
         if not campaign_id:
             raise exception.NotFoundError("creator")
 
+        filters = "".join(
+            "&filter[{}={}".format(key[8:], text.escape(value))
+            for key, value in query.items()
+            if key.startswith("filters[")
+        )
+
         url = self._build_url("posts", (
-            "&sort=-published_at"
+            "&sort=" + query.get("sort", "-published_at") +
             "&filter[is_draft]=false"
             "&filter[contains_exclusive_posts]=true"
-            "&filter[campaign_id]=" + campaign_id
+            "&filter[campaign_id]=" + campaign_id + filters
         ))
         return self._pagination(url)
 
