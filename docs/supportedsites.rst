@@ -53,6 +53,7 @@ Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
+ImageChest           https://imgchest.com/               Galleries
 ImageFap             https://imagefap.com/               Galleries, individual Images, User Profiles
 ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
@@ -126,6 +127,7 @@ Twitter              https://twitter.com/                |twitter-C|            
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
+Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga
