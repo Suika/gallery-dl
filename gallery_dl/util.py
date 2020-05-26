@@ -113,6 +113,57 @@ def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     fp.write("\n")
 
 
+def dump_response(response, fp=sys.stdout,
+                  headers=True, content=True, hide_auth=True):
+    """Write the contents of 'response' into a file-like object"""
+
+    if headers:
+        request = response.request
+        req_headers = request.headers.copy()
+        outfmt = """\
+{request.method} {request.url}
+Status: {response.status_code} {response.reason}
+
+Request Headers
+---------------
+{request_headers}
+
+Response Headers
+----------------
+{response_headers}
+"""
+        if hide_auth:
+            authorization = req_headers.get("Authorization")
+            if authorization:
+                atype, sep, _ = authorization.partition(" ")
+                req_headers["Authorization"] = atype + " ***" if sep else "***"
+
+            cookies = req_headers.get("Cookie")
+            if cookies:
+                req_headers["Cookie"] = ";".join(
+                    cookie.partition("=")[0] + "=***"
+                    for cookie in cookies.split(";")
+                )
+
+        fp.write(outfmt.format(
+            request=request,
+            response=response,
+            request_headers="\n".join(
+                name + ": " + value
+                for name, value in req_headers.items()
+            ),
+            response_headers="\n".join(
+                name + ": " + value
+                for name, value in response.headers.items()
+            ),
+        ).encode())
+
+    if content:
+        if headers:
+            fp.write(b"\nContent\n-------\n")
+        fp.write(response.content)
+
+
 def expand_path(path):
     """Expand environment variables and tildes (~)"""
     if not path:
@@ -674,22 +725,26 @@ class PathFormat():
         self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")
+        replace = extractor.config("path-replace", "_")
+
         if restrict == "auto":
             restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
             restrict = "/"
         elif restrict == "windows":
             restrict = "\\\\|/<>:\"?*"
+        self.clean_segment = self._build_cleanfunc(restrict, replace)
 
         remove = extractor.config("path-remove", "\x00-\x1f\x7f")
-
-        self.clean_segment = self._build_cleanfunc(restrict, "_")
         self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod
     def _build_cleanfunc(chars, repl):
         if not chars:
             return lambda x: x
+        elif isinstance(chars, dict):
+            def func(x, table=str.maketrans(chars)):
+                return x.translate(table)
         elif len(chars) == 1:
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)

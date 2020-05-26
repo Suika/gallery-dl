@@ -131,11 +131,14 @@ Description Use an extractor's current target directory as
 extractor.*.path-restrict
 -------------------------
 =========== =====
-Type        ``string``
+Type        ``string`` or ``object``
 Default     ``"auto"``
-Example     ``"/!? (){}"``
-Description Set of characters to replace with underscores (``_``)
-            in generated path segment names.
+Example     | ``"/!? (){}"``
+            | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
+Description | A string of characters to be replaced with the value of
+              `path-replace <extractor.*.path-replace>`__
+            | or an object mapping invalid/unwanted characters to their replacements
+            | for generated path segment names.
 
             Special values:
 
@@ -144,8 +147,18 @@ Description Set of characters to replace with underscores (``_``)
             * ``"unix"``: ``"/"``
             * ``"windows"``: ``"\\\\|/<>:\"?*"``
 
-            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
+=========== =====
+
+
+extractor.*.path-replace
+------------------------
+=========== =====
+Type        ``string``
+Default     ``"_"``
+Description The replacement character(s) for
+            `path-restrict <extractor.*.path-restrict>`__
 =========== =====
 
 
@@ -156,7 +169,7 @@ Type        ``string``
 Default     ``"\u0000-\u001f\u007f"`` (ASCII control characters)
 Description Set of characters to remove from generated path names.
 
-            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
 =========== =====
 
@@ -894,6 +907,16 @@ Description Controls how a user is directed to an OAuth authorization site.
             * ``true``: Use Python's |webbrowser.open()|_ method to automatically
               open the URL in the user's browser.
             * ``false``: Ask the user to copy & paste an URL from the terminal.
+=========== =====
+
+
+extractor.oauth.cache
+---------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Store tokens received during OAuth authorizations
+            in `cache <cache.file_>`__.
 =========== =====
 
 
