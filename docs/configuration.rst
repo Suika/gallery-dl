@@ -136,7 +136,7 @@ Default     ``"auto"``
 Example     | ``"/!? (){}"``
             | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
 Description | A string of characters to be replaced with the value of
-              `path-replace <extractor.*.path-replace>`__
+              `path-replace <extractor.*.path-replace_>`__
             | or an object mapping invalid/unwanted characters to their replacements
             | for generated path segment names.
 
@@ -158,7 +158,7 @@ extractor.*.path-replace
 Type        ``string``
 Default     ``"_"``
 Description The replacement character(s) for
-            `path-restrict <extractor.*.path-restrict>`__
+            `path-restrict <extractor.*.path-restrict_>`__
 =========== =====
 
 
@@ -1892,7 +1892,7 @@ cache.file
 ----------
 =========== =====
 Type        |Path|_
-Default     * |tempfile.gettempdir()|__ + ``".gallery-dl.cache"`` on Windows
+Default     * (``%APPDATA%`` or ``"~"``) + ``"/gallery-dl/cache.sqlite3"`` on Windows
             * (``$XDG_CACHE_HOME`` or ``"~/.cache"``) + ``"/gallery-dl/cache.sqlite3"`` on all other platforms
 Description Path of the SQLite3 database used to cache login sessions,
             cookies and API tokens across `gallery-dl` invocations.
