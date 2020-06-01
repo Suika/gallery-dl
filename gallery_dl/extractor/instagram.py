@@ -14,6 +14,7 @@ from .. import text, exception
 from ..cache import cache
 import itertools
 import json
+import time
 import re
 
 
@@ -83,9 +84,10 @@ class InstagramExtractor(Extractor):
         url = self.root + "/accounts/login/ajax/"
         data = {
             "username"     : username,
-            "password"     : password,
+            "enc_password" : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
+                int(time.time()), password),
             "queryParams"  : "{}",
-            "optIntoOneTap": "true",
+            "optIntoOneTap": "false",
         }
         response = self.request(url, method="POST", headers=headers, data=data)
 
@@ -208,12 +210,12 @@ class InstagramExtractor(Extractor):
             user_id = '"{}"'.format(
                 shared_data['entry_data']['StoriesPage'][0]['user']['id'])
             highlight_id = ''
-            query_hash = 'cda12de4f7fd3719c0569ce03589f4c4'
+            query_hash = '0a85e6ea60a4c99edc58ab2f3d17cfdf'
 
         variables = (
             '{{'
             '"reel_ids":[{}],"tag_names":[],"location_ids":[],'
-            '"highlight_reel_ids":[{}],"precomposed_overlay":true,'
+            '"highlight_reel_ids":[{}],"precomposed_overlay":false,'
             '"show_story_viewer_list":true,'
             '"story_viewer_fetch_count":50,"story_viewer_cursor":"",'
             '"stories_video_dash_manifest":false'
@@ -269,7 +271,7 @@ class InstagramExtractor(Extractor):
 
         data = self._request_graphql(
             variables,
-            'aec5501414615eca36a9acf075655b1e',
+            'ad99dd9d3646cc3c0dda65debcd266a7',
             shared_data['config']['csrf_token'],
         )
 
@@ -528,7 +530,7 @@ class InstagramUserExtractor(InstagramExtractor):
             'node_id': 'id',
             'variables_id': 'id',
             'edge_to_medias': 'edge_owner_to_timeline_media',
-            'query_hash': 'f2405b236d85e8296cf30347c9f08c2a',
+            'query_hash': '44efc15d3c13342d02df0b5a9fa3d33f',
         })
 
         if self.config('highlights'):
@@ -597,5 +599,5 @@ class InstagramTagExtractor(InstagramExtractor):
             'node_id': 'name',
             'variables_id': 'tag_name',
             'edge_to_medias': 'edge_hashtag_to_media',
-            'query_hash': 'f12c9ec5e46a3173b2969c712ad84744',
+            'query_hash': '7dabc71d3e758b1ec19ffb85639e427b',
         })
