@@ -39,18 +39,28 @@ class TwitterExtractor(Extractor):
         yield Message.Version, 1
 
         for tweet in self.tweets():
+
             if not self.retweets and "retweeted_status_id_str" in tweet or \
                     not self.replies and "in_reply_to_user_id_str" in tweet:
                 continue
 
+            if self.twitpic:
+                self._extract_twitpic(tweet)
             if "extended_entities" not in tweet:
                 continue
 
             tweet.update(metadata)
+            tweet["date"] = text.parse_datetime(
+                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            entities = tweet["extended_entities"]
+            del tweet["extended_entities"]
+            del tweet["entities"]
+
             yield Message.Directory, tweet
-            for tweet["num"], media in enumerate(
-                    tweet["extended_entities"]["media"], 1):
-                tweet.update(media["original_info"])
+            for tweet["num"], media in enumerate(entities["media"], 1):
+
+                tweet["width"] = media["original_info"].get("width", 0)
+                tweet["height"] = media["original_info"].get("height", 0)
 
                 if "video_info" in media and self.videos:
 
@@ -74,11 +84,36 @@ class TwitterExtractor(Extractor):
                         text.nameext_from_url(url, tweet)
                         yield Message.Url, url, tweet
 
-                else:
+                elif "media_url_https" in media:
                     url = media["media_url_https"]
                     urls = [url + size for size in self.sizes]
                     text.nameext_from_url(url, tweet)
                     yield Message.Urllist, urls, tweet
+
+                else:
+                    url = media["media_url"]
+                    text.nameext_from_url(url, tweet)
+                    yield Message.Url, url, tweet
+
+    def _extract_twitpic(self, tweet):
+        twitpics = []
+        for url in tweet["entities"].get("urls", ()):
+            url = url["expanded_url"]
+            if "//twitpic.com/" in url:
+                response = self.request(url, fatal=False)
+                if response.status_code >= 400:
+                    continue
+                url = text.extract(
+                    response.text, 'name="twitter:image" value="', '"')[0]
+                twitpics.append({
+                    "original_info": {},
+                    "media_url"    : url,
+                })
+        if twitpics:
+            if "extended_entities" in tweet:
+                tweet["extended_entities"]["media"].extend(twitpics)
+            else:
+                tweet["extended_entities"] = {"media": twitpics}
 
     def metadata(self):
         """Return general metadata"""
@@ -91,43 +126,40 @@ class TwitterExtractor(Extractor):
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
-            #  self.logged_in = True
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
-        self.log.warning(
-            'Logging in with username and password is currently not possible. '
-            'Use cookies from your browser session instead.')
-        return {}
-
-        """
         self.log.info("Logging in as %s", username)
 
-        headers = {"User-Agent": self.user_agent}
-        page = self.request(self.root + "/login", headers=headers).text
-        pos = page.index('name="authenticity_token"')
-        token = text.extract(page, 'value="', '"', pos-80)[0]
+        url = "https://mobile.twitter.com/i/nojs_router"
+        params = {"path": "/login"}
+        headers = {"Referer": self.root + "/", "Origin": self.root}
+        page = self.request(
+            url, method="POST", params=params, headers=headers, data={}).text
 
-        url = self.root + "/sessions"
+        pos = page.index('name="authenticity_token"')
+        token = text.extract(page, 'value="', '"', pos)[0]
+
+        url = "https://mobile.twitter.com/sessions"
         data = {
+            "authenticity_token"        : token,
             "session[username_or_email]": username,
             "session[password]"         : password,
-            #  "authenticity_token"        : token,
-            "ui_metrics"                : '{"rf":{},"s":""}',
-            "scribe_log"                : "",
-            "redirect_after_login"      : "",
             "remember_me"               : "1",
+            "wfa"                       : "1",
+            "commit"                    : "+Log+in+",
+            "ui_metrics"                : "",
         }
-        response = self.request(url, method="POST", headers=headers, data=data)
-        if "/error" in response.url:
-            raise exception.AuthenticationError()
-
-        return {
+        response = self.request(url, method="POST", data=data)
+        cookies = {
             cookie.name: cookie.value
             for cookie in self.session.cookies
-            if cookie.domain and "twitter.com" in cookie.domain
+            if cookie.domain == self.cookiedomain
         }
-        """
+
+        if "/error" in response.url or "auth_token" not in cookies:
+            raise exception.AuthenticationError()
+        return cookies
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
@@ -378,6 +410,10 @@ class TwitterAPI():
 
                 if entry["entryId"].startswith(entry_tweet):
                     tid = entry["content"]["item"]["content"]["tweet"]["id"]
+                    if tid not in tweets:
+                        self.extractor.log.debug(
+                            "Skipping unavailable Tweet %s", tid)
+                        continue
                     tweet = tweets[tid]
                     tweet["user"] = users[tweet["user_id_str"]]
 

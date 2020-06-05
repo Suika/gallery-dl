@@ -576,7 +576,8 @@ extractor.deviantart.extra
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Download extra Sta.sh resources from description texts.
+Description Download extra Sta.sh resources from
+            description texts and journals.
 
             Note: Enabling this option also enables deviantart.metadata_.
 =========== =====
@@ -1189,15 +1190,6 @@ Description A (comma-separated) list of post types to extract images, etc. from.
             ``video``, ``audio``, ``photo``, ``chat``.
 
             You can use ``"all"`` instead of listing all types separately.
-=========== =====
-
-
-extractor.twitter.content
--------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Extract tweet text as ``content`` metadata.
 =========== =====
 
 
