@@ -33,11 +33,21 @@ def solve_challenge(session, response, kwargs):
     parsed = urllib.parse.urlsplit(response.url)
     root = parsed.scheme + "://" + parsed.netloc
 
+    page = response.text
+    try:
+        params = {"ray": text.extract(page, '?ray=', '"')[0]}
+
+        url = root + "/cdn-cgi/images/trace/jschal/nojs/transparent.gif"
+        session.request("GET", url, params=params)
+
+        url = root + "/cdn-cgi/images/trace/jschal/js/nocookie/transparent.gif"
+        session.request("GET", url, params=params)
+    except Exception:
+        pass
+
     cf_kwargs = {}
     headers = cf_kwargs["headers"] = collections.OrderedDict()
     params = cf_kwargs["data"] = collections.OrderedDict()
-
-    page = response.text
     url = root + text.unescape(text.extract(page, 'action="', '"')[0])
     headers["Referer"] = response.url
 
@@ -54,23 +64,26 @@ def solve_challenge(session, response, kwargs):
         params[name] = value
 
     time.sleep(4)
-
-    cf_kwargs["allow_redirects"] = False
     cf_response = session.request("POST", url, **cf_kwargs)
+
+    if cf_response.history:
+        initial_response = cf_response.history[0]
+    else:
+        initial_response = cf_response
 
     cookies = {
         cookie.name: cookie.value
-        for cookie in cf_response.cookies
+        for cookie in initial_response.cookies
     }
 
     if not cookies:
         import logging
         log = logging.getLogger("cloudflare")
-        log.debug("Headers:\n%s", cf_response.headers)
-        log.debug("Content:\n%s", cf_response.text)
+        log.debug("Headers:\n%s", initial_response.headers)
+        log.debug("Content:\n%s", initial_response.text)
         return cf_response, None, None
 
-    domain = next(iter(cf_response.cookies)).domain
+    domain = next(iter(initial_response.cookies)).domain
     cookies["__cfduid"] = response.cookies.get("__cfduid", "")
     return cf_response, domain, cookies
 
