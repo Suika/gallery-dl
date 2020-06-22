@@ -41,7 +41,9 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
 
-            if not self.retweets and "retweeted_status_id_str" in tweet or \
+            if not self.retweets and (
+                    "retweeted_status_id_str" in tweet or
+                    "quoted_status_id_str" in tweet) or \
                     not self.replies and "in_reply_to_user_id_str" in tweet:
                 continue
 
@@ -302,7 +304,7 @@ class TwitterSearchExtractor(TwitterExtractor):
         return {"search": text.unquote(self.user)}
 
     def tweets(self):
-        return TwitterAPI(self).search(self.user)
+        return TwitterAPI(self).search(text.unquote(self.user))
 
 
 class TwitterTweetExtractor(TwitterExtractor):
@@ -321,7 +323,6 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
-            "options": (("videos", True),),
             "pattern": r"https://video.twimg.com/ext_tw_video/.+\.mp4\?tag=5",
         }),
         # content with emoji, newlines, hashtags (#338)
@@ -333,19 +334,14 @@ class TwitterTweetExtractor(TwitterExtractor):
                 "It’s our \\(Mystery\\) Gift to you, Trainers! \n\n❓🎁➡️ "
             )},
         }),
-        # Reply to another tweet (#403)
-        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
-            "options": (("videos", "ytdl"),),
-            "pattern": r"ytdl:https://twitter.com/i/web.+/1103767554424598528",
+        # Reply to deleted tweet (#403, #838)
+        ("https://twitter.com/i/web/status/1170041925560258560", {
+            "pattern": r"https://pbs.twimg.com/media/EDzS7VrU0AAFL4_.jpg:orig",
         }),
         # 'replies' option (#705)
-        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
+        ("https://twitter.com/i/web/status/1170041925560258560", {
             "options": (("replies", False),),
             "count": 0,
-        }),
-        # /i/web/ URL
-        ("https://twitter.com/i/web/status/1155074198240292865", {
-            "pattern": r"https://pbs.twimg.com/media/EAel0vUUYAAZ4Bq.jpg:orig",
         }),
         # quoted tweet (#526)
         ("https://twitter.com/Pistachio/status/1222690391817932803", {
@@ -455,7 +451,11 @@ class TwitterAPI():
     def search(self, query):
         endpoint = "2/search/adaptive.json"
         params = self.params.copy()
-        params["q"] = text.unquote(query)
+        params["q"] = query
+        params["tweet_search_mode"] = "live"
+        params["query_source"] = "typed_query"
+        params["pc"] = "1"
+        params["spelling_corrections"] = "1"
         return self._pagination(
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
 
@@ -503,17 +503,20 @@ class TwitterAPI():
             for entry in instr[0]["addEntries"]["entries"]:
 
                 if entry["entryId"].startswith(entry_tweet):
-                    tid = entry["content"]["item"]["content"]["tweet"]["id"]
-                    if tid not in tweets:
+                    try:
+                        tweet = tweets[
+                            entry["content"]["item"]["content"]["tweet"]["id"]]
+                    except KeyError:
                         self.extractor.log.debug(
-                            "Skipping unavailable Tweet %s", tid)
+                            "Skipping unavailable Tweet %s",
+                            entry["entryId"][6:])
                         continue
-                    tweet = tweets[tid]
                     tweet["user"] = users[tweet["user_id_str"]]
 
                     if "quoted_status_id_str" in tweet:
                         quoted = tweets.get(tweet["quoted_status_id_str"])
                         if quoted:
+                            tweet["author"] = users[quoted["user_id_str"]]
                             tweet["full_text_quoted"] = quoted["full_text"]
                             if "extended_entities" in quoted:
                                 tweet["extended_entities"] = \
