@@ -231,6 +231,7 @@ Description The username and password to use when attempting to log in to
             * ``instagram``
             * ``luscious``
             * ``sankaku``
+            * ``subscribestar``
             * ``tsumino``
             * ``twitter``
 
@@ -723,6 +724,18 @@ Description Minimum wait time in seconds before API requests.
 
             Note: This value will internally be rounded up
             to the next power of 2.
+=========== =====
+
+
+extractor.exhentai.domain
+-------------------------
+=========== =====
+Type        ``string``
+Default     ``"auto"``
+Description * ``"auto"``: Use ``e-hentai.org`` or ``exhentai.org``
+              depending on the input URL
+            * ``"e-hentai.org"``: Use ``e-hentai.org`` for all URLs
+            * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
 =========== =====
 
 

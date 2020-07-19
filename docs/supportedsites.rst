@@ -39,7 +39,7 @@ Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, P
 Fuskator             https://fuskator.com/               Galleries, Search Results
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag Searches
-Gfycat               https://gfycat.com/                 individual Images
+Gfycat               https://gfycat.com/                 individual Images, Search Results, User Profiles
 HBrowse              https://www.hbrowse.com/            Chapters, Manga
 Hentai Cafe          https://hentai.cafe/                Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     |hentaifoundry-C|
@@ -54,7 +54,7 @@ Hypnohub             https://hypnohub.net/               Pools, Popular Images, 
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageChest           https://imgchest.com/               Galleries
-ImageFap             https://imagefap.com/               Galleries, individual Images, User Profiles
+ImageFap             https://www.imagefap.com/           Galleries, individual Images, User Profiles
 ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
@@ -121,7 +121,7 @@ SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Speaker Deck         https://speakerdeck.com/            Presentations
-SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
+SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Optional
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
