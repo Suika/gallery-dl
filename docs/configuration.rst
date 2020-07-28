@@ -228,6 +228,7 @@ Description The username and password to use when attempting to log in to
             * ``e621``
             * ``exhentai``
             * ``idolcomplex``
+            * ``inkbunny``
             * ``instagram``
             * ``luscious``
             * ``sankaku``
@@ -870,15 +871,6 @@ Description Controls whether to choose the GIF or MP4 version of an animation.
               ``prefer_video`` flag in an image's metadata is set.
             * ``false``: Always choose GIF.
             * ``"always"``: Always choose MP4.
-=========== =====
-
-
-extractor.inkbunny.metadata
----------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Fetch ``description``, ``writing``, and ``pools`` metadata fields.
 =========== =====
 
 

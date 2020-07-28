@@ -19,8 +19,8 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?inkbunny\.net"
 class InkbunnyExtractor(Extractor):
     """Base class for inkbunny extractors"""
     category = "inkbunny"
-    directory_fmt = ("{category}", "{post[username]!l}")
-    filename_fmt = "{post[submission_id]} {file_id} {post[title]}.{extension}"
+    directory_fmt = ("{category}", "{username!l}")
+    filename_fmt = "{submission_id} {file_id} {title}.{extension}"
     archive_fmt = "{file_id}"
     root = "https://inkbunny.net"
 
@@ -38,6 +38,7 @@ class InkbunnyExtractor(Extractor):
             post["date"] = text.parse_datetime(
                 post["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
             post["tags"] = [kw["keyword_name"] for kw in post["keywords"]]
+            post["ratings"] = [r["name"] for r in post["ratings"]]
             files = post["files"]
 
             for key in to_bool:
@@ -46,14 +47,14 @@ class InkbunnyExtractor(Extractor):
             del post["keywords"]
             del post["files"]
 
-            yield Message.Directory, {"post": post}
+            yield Message.Directory, post
             for file in files:
-                file["post"] = post
-                file["deleted"] = (file["deleted"] == "t")
-                file["date"] = text.parse_datetime(
+                post.update(file)
+                post["deleted"] = (file["deleted"] == "t")
+                post["date"] = text.parse_datetime(
                     file["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
-                text.nameext_from_url(file["file_name"], file)
-                yield Message.Url, file["file_url_full"], file
+                text.nameext_from_url(file["file_name"], post)
+                yield Message.Url, file["file_url_full"], post
 
 
 class InkbunnyUserExtractor(InkbunnyExtractor):
@@ -66,52 +67,46 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
                        r"/\d+/\d+_soina_.+",
             "range": "20-50",
             "keyword": {
-                "date": "type:datetime",
-                "deleted": bool,
-                "file_id": "re:[0-9]+",
-                "filename": r"re:[0-9]+_soina_\w+",
+                "date"         : "type:datetime",
+                "deleted"      : bool,
+                "file_id"      : "re:[0-9]+",
+                "filename"     : r"re:[0-9]+_soina_\w+",
                 "full_file_md5": "re:[0-9a-f]{32}",
-                "mimetype": str,
-                "submission_file_order": "re:[0-9]+",
+                "mimetype"     : str,
                 "submission_id": "re:[0-9]+",
-                "user_id": "20969",
-                "post": {
-                    "comments_count" : "re:[0-9]+",
-                    "date"           : "type:datetime",
-                    "deleted"        : bool,
-                    "digitalsales"   : bool,
-                    "favorite"       : bool,
-                    "favorites_count": "re:[0-9]+",
-                    "forsale"        : bool,
-                    "friends_only"   : bool,
-                    "guest_block"    : bool,
-                    "hidden"         : bool,
-                    "pagecount"      : "re:[0-9]+",
-                    "pools"          : list,
-                    "pools_count"    : int,
-                    "printsales"     : bool,
-                    "public"         : bool,
-                    "rating_id"      : "re:[0-9]+",
-                    "rating_name"    : str,
-                    "ratings"        : list,
-                    "scraps"         : bool,
-                    "submission_id"  : "re:[0-9]+",
-                    "tags"           : list,
-                    "title"          : str,
-                    "type_name"      : str,
-                    "user_id"        : "20969",
-                    "username"       : "soina",
-                    "views"          : str,
-                },
+                "user_id"      : "20969",
+                "comments_count" : "re:[0-9]+",
+                "deleted"        : bool,
+                "digitalsales"   : bool,
+                "favorite"       : bool,
+                "favorites_count": "re:[0-9]+",
+                "forsale"        : bool,
+                "friends_only"   : bool,
+                "guest_block"    : bool,
+                "hidden"         : bool,
+                "pagecount"      : "re:[0-9]+",
+                "pools"          : list,
+                "pools_count"    : int,
+                "printsales"     : bool,
+                "public"         : bool,
+                "rating_id"      : "re:[0-9]+",
+                "rating_name"    : str,
+                "ratings"        : list,
+                "scraps"         : bool,
+                "tags"           : list,
+                "title"          : str,
+                "type_name"      : str,
+                "username"       : "soina",
+                "views"          : str,
             },
         }),
         ("https://inkbunny.net/gallery/soina", {
             "range": "1-25",
-            "keyword": {"post": {"scraps": False}},
+            "keyword": {"scraps": False},
         }),
         ("https://inkbunny.net/scraps/soina", {
             "range": "1-25",
-            "keyword": {"post": {"scraps": True}},
+            "keyword": {"scraps": True},
         }),
     )
 
@@ -159,7 +154,7 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
         self.submission_id = match.group(1)
 
     def posts(self):
-        return self.api.detail(self.submission_id)
+        return self.api.detail(({"submission_id": self.submission_id},))
 
 
 class InkbunnyAPI():
@@ -171,16 +166,22 @@ class InkbunnyAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.session_id = None
-        self.metadata = extractor.config("metadata")
 
-    def detail(self, submission_ids):
+    def detail(self, submissions):
         """Get full details about submissions with the given IDs"""
-        params = {"submission_ids": submission_ids}
-        if self.metadata:
-            params["show_description"] = "yes"
-            params["show_writing"] = "yes"
-            params["show_pools"] = "yes"
-        return self._call("submissions", params)["submissions"]
+        ids = {
+            sub["submission_id"]: idx
+            for idx, sub in enumerate(submissions)
+        }
+        params = {
+            "submission_ids": ",".join(ids),
+            "show_description": "yes",
+        }
+
+        submissions = [None] * len(ids)
+        for sub in self._call("submissions", params)["submissions"]:
+            submissions[ids[sub["submission_id"]]] = sub
+        return submissions
 
     def search(self, params):
         """Perform a search"""
@@ -221,22 +222,20 @@ class InkbunnyAPI():
         return data
 
     def _pagination_search(self, params):
+        params["page"] = 1
         params["get_rid"] = "yes"
         params["submission_ids_only"] = "yes"
 
         while True:
             data = self._call("search", params)
-            yield from self.detail(
-                ",".join(s["submission_id"] for s in data["submissions"]))
+            yield from self.detail(data["submissions"])
 
             if data["page"] >= data["pages_count"]:
                 return
             if "get_rid" in params:
                 del params["get_rid"]
                 params["rid"] = data["rid"]
-                params["page"] = 2
-            else:
-                params["page"] += 1
+            params["page"] += 1
 
 
 @cache(maxage=360*24*3600, keyarg=1)
