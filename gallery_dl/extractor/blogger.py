@@ -147,7 +147,7 @@ class BloggerPostExtractor(BloggerExtractor):
 class BloggerBlogExtractor(BloggerExtractor):
     """Extractor for an entire Blogger blog"""
     subcategory = "blog"
-    pattern = BASE_PATTERN + "/?$"
+    pattern = BASE_PATTERN + r"/?$"
     test = (
         ("https://julianbphotography.blogspot.com/", {
             "range": "1-25",
@@ -164,6 +164,34 @@ class BloggerBlogExtractor(BloggerExtractor):
         return self.api.blog_posts(blog["id"])
 
 
+class BloggerSearchExtractor(BloggerExtractor):
+    """Extractor for search resuls and labels"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search(?:/?\?q=([^/?&#]+)|/label/([^/?&#]+))"
+    test = (
+        ("https://julianbphotography.blogspot.com/search?q=400mm", {
+            "count": "< 10"
+        }),
+        ("https://dmmagazine.blogspot.com/search/label/D%26D", {
+            "range": "1-25",
+            "count": 25,
+        }),
+    )
+
+    def __init__(self, match):
+        BloggerExtractor.__init__(self, match)
+        query = match.group(3)
+        if query:
+            self.query, self.label = query, None
+        else:
+            self.query, self.label = None, match.group(4)
+
+    def posts(self, blog):
+        if self.query:
+            return self.api.blog_search(blog["id"], text.unquote(self.query))
+        return self.api.blog_posts(blog["id"], text.unquote(self.label))
+
+
 class BloggerAPI():
     """Minimal interface for the Blogger v3 API
 
@@ -178,8 +206,15 @@ class BloggerAPI():
     def blog_by_url(self, url):
         return self._call("blogs/byurl", {"url": url}, "blog")
 
-    def blog_posts(self, blog_id):
-        return self._pagination("blogs/{}/posts".format(blog_id), {})
+    def blog_posts(self, blog_id, label=None):
+        endpoint = "blogs/{}/posts".format(blog_id)
+        params = {"labels": label}
+        return self._pagination(endpoint, params)
+
+    def blog_search(self, blog_id, query):
+        endpoint = "blogs/{}/posts/search".format(blog_id)
+        params = {"q": query}
+        return self._pagination(endpoint, params)
 
     def post_by_path(self, blog_id, path):
         endpoint = "blogs/{}/posts/bypath".format(blog_id)
