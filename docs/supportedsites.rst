@@ -28,7 +28,7 @@ Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
 E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Optional
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag Searches         Optional
-Eka's Portal         https://aryion.com/                 Galleries, Posts                                   Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
+Eka's Portal         https://aryion.com/                 Galleries, Posts                                   Optional
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
@@ -156,7 +156,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
 .. |furaffinity-C| replace:: Favorites, Galleries, Posts, Scraps, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
-.. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Subreddits, User Profiles
+.. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles
 .. |instagram-C| replace:: Channels, individual Images, Saved Posts, Stories, Tag Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, individual Images, User Profiles
