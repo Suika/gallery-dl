@@ -208,21 +208,16 @@ EXTRACTORS = {
         "pattern": r"(?:(?:www\.)?sensescans\.com/reader"
                    r"|reader\.sensescans\.com)",
         "test-chapter": (
-            (("https://sensescans.com/reader/read/"
-              "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "8bbc59a995640bbb944c0b1be06a490909b58be1",
-                  "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
+            ("https://sensescans.com/reader/read/ao_no_orchestra/en/0/26/", {
+                "url": "bbd428dc578f5055e9f86ad635b510386cd317cd",
+                "keyword": "083ef6f8831c84127fe4096fa340a249be9d1424",
             }),
-            (("https://reader.sensescans.com/read/"
-              "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "8bbc59a995640bbb944c0b1be06a490909b58be1",
-                  "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
-            }),
+            ("https://reader.sensescans.com/read/ao_no_orchestra/en/0/26/"),
         ),
         "test-manga":
             ("https://sensescans.com/reader/series/yotsubato/", {
-                "url": "ee4dca7c421bf15ac039200f8c0bcb0858153640",
-                "keyword": "f94961bd731bd878bbd4d48555bc3ace1d937364",
+                "url": "305e6eb6160e3bb90c3de39ff5fb7c971e052087",
+                "keyword": "562fb5a7362a4cb43d59d5c8a6ea8080fc65cf99",
             }),
     },
     "worldthree": {
