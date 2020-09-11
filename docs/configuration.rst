@@ -363,18 +363,38 @@ Description Transfer an extractor's (sub)category values to all child
 =========== =====
 
 
+extractor.*.blacklist & .whitelist
+----------------------------------
+=========== =====
+Type        ``list`` of ``strings``
+Default     ``["oauth", "recursive", "test"]`` + current extractor category
+Description A list of extractor categories to ignore (or allow)
+            when spawning child extractors for unknown URLs,
+            e.g. from ``reddit`` or ``plurk``.
+
+            Note: Any ``blacklist`` setting will automatically include
+            ``"oauth"``, ``"recursive"``, and ``"test"``.
+=========== =====
+
+
 extractor.*.archive
 -------------------
 =========== =====
 Type        |Path|_
 Default     ``null``
+Example     ``"$HOME/.archives/{category}.sqlite3"``
 Description File to store IDs of downloaded files in. Downloads of files
-            already recorded in this archive file will be skipped_.
+            already recorded in this archive file will be
+            `skipped <extractor.*.skip_>`__.
 
             The resulting archive file is not a plain text file but an SQLite3
             database, as either lookup operations are significantly faster or
             memory requirements are significantly lower when the
             amount of stored IDs gets reasonably large.
+
+            Note: archive paths support regular `format string`_ replacements,
+            but be aware that using external inputs for building local paths
+            may pose a security risk.
 =========== =====
 
 
@@ -1058,16 +1078,6 @@ Description Controls how to handle redirects to CAPTCHA pages.
 
             * ``"stop``: Stop the current extractor run.
             * ``"wait``: Ask the user to solve the CAPTCHA and wait.
-=========== =====
-
-
-extractor.recursive.blacklist
------------------------------
-=========== =====
-Type        ``list`` of ``strings``
-Default     ``["directlink", "oauth", "recursive", "test"]``
-Description A list of extractor categories which should be ignored when using
-            the ``recursive`` extractor.
 =========== =====
 
 
@@ -2265,7 +2275,6 @@ Description An object with the ``name`` of a post-processor and its options.
 .. |strptime| replace:: strftime() and strptime() Behavior
 
 .. _base-directory: `extractor.*.base-directory`_
-.. _skipped: `extractor.*.skip`_
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: extractor.deviantart.metadata_
 
