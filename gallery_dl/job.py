@@ -59,6 +59,9 @@ class Job():
 
     def run(self):
         """Execute or run the job"""
+        sleep = self.extractor.config("sleep-extractor")
+        if sleep:
+            time.sleep(sleep)
         try:
             log = self.extractor.log
             for msg in self.extractor:
@@ -414,7 +417,7 @@ class DownloadJob(Job):
             else:
                 self.extractor.log.debug("Using download archive '%s'", path)
 
-        postprocessors = config("postprocessors")
+        postprocessors = self.extractor.config_accumulate("postprocessors")
         if postprocessors:
             pp_log = self.get_logger("postprocessor")
             pp_list = []
@@ -586,6 +589,10 @@ class DataJob(Job):
         self.filter = (lambda x: x) if private else util.filter_dict
 
     def run(self):
+        sleep = self.extractor.config("sleep-extractor")
+        if sleep:
+            time.sleep(sleep)
+
         # collect data
         try:
             for msg in self.extractor:
