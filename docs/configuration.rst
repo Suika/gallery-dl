@@ -962,13 +962,13 @@ Type
 Default
     ``"gallery"``
 Example
-    ``"scraps,favorite"`` or ``["scraps", "favorite"]``
+    ``"scraps,stories"`` or ``["scraps", "stories"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"favorite"``.
+    ``"gallery"``, ``"scraps"``, ``"stories"``, ``"favorite"``.
 
     You can use ``"all"`` instead of listing all values separately.
 
@@ -1458,6 +1458,9 @@ Default
     ``true``
 Description
     Fetch media from Retweets.
+
+    If this value is ``"original"``, metadata for these files
+    will be taken from the original Tweets, not the Retweets.
 
 
 extractor.twitter.twitpic
