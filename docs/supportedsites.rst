@@ -65,7 +65,6 @@ Joyreactor           http://joyreactor.com/              Posts, Search Results, 
 Keenspot             http://www.keenspot.com/            Comics
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
-KissManga            https://kissmanga.com/              Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag Searches
 LINE BLOG            https://www.lineblog.me/            Blogs, Posts
@@ -155,7 +154,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
 .. |furaffinity-C| replace:: Favorites, Galleries, Posts, Scraps, Search Results, User Profiles
-.. |hentaifoundry-C| replace:: Favorites, Galleries, individual Images, Popular Images, Recent Images, Scraps, Stories, User Profiles
+.. |hentaifoundry-C| replace:: Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles
 .. |instagram-C| replace:: Channels, individual Images, Saved Posts, Stories, Tag Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
