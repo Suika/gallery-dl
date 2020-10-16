@@ -94,7 +94,7 @@ Patreon              https://www.patreon.com/            Creators, Posts, User P
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
-Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections
+Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections Optional
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
@@ -128,7 +128,7 @@ Twitter              https://twitter.com/                |twitter-C|            
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 Warosu               https://warosu.org/                 Threads
-Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions
+Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          Optional
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks

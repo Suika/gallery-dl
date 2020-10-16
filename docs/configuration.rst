@@ -267,17 +267,18 @@ Description
     * ``inkbunny``
     * ``instagram``
     * ``luscious``
+    * ``pinterest``
     * ``sankaku``
     * ``subscribestar``
     * ``tsumino``
     * ``twitter``
 
-    These values can also be set via the ``-u/--username`` and
-    ``-p/--password`` command-line options or by using a |.netrc|_ file.
-    (see Authentication_)
+    These values can also be specified via the
+    ``-u/--username`` and ``-p/--password`` command-line options or
+    by using a |.netrc|_ file. (see Authentication_)
 
     Note: The password values for ``danbooru`` and ``e621`` should be
-    the API keys found in your user profile, not your actual account
+    the API keys found in your user profile, not the actual account
     password.
 
 
@@ -1495,6 +1496,17 @@ Description
     your account's browsing settings and default filters when searching.
 
     See https://wallhaven.cc/help/api for more information.
+
+
+extractor.weasyl.api-key
+------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Generate an API key at https://www.weasyl.com/control/apikeys and
+    set this field in your config to the value of that key.
 
 
 extractor.weibo.retweets
